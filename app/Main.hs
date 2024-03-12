@@ -8,6 +8,8 @@
 module Main (main) where
 
 import ConfigLib
+import TypeLib
+import FileLib
 import System.Environment(getArgs)
 
 {-  | main function

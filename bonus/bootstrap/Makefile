@@ -5,11 +5,11 @@
 ## Makefile
 ##
 
-NAME = imageCompressor
+NAME = Bootstrap-ImageCompressor
 
 all:
 	stack build
-	cp $(shell stack path --local-install-root)/bin/ImageCompressor-exe $(NAME)
+	cp $(shell stack path --local-install-root)/bin/Bootstrap-ImageCompressor-exe $(NAME)
 
 clean:
 	stack clean

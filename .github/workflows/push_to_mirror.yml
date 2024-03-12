@@ -1,9 +1,9 @@
-name: PROJECT_NAME
+name: ImageCompressor
 
 on: [push, pull_request]
 
 env:
-  MIRROR_URL: ""
+  MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-400-LIL-4-1-compressor-leo.dumont.git"
 
 jobs:
   build:

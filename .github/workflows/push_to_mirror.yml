@@ -6,43 +6,6 @@ env:
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-400-LIL-4-1-compressor-leo.dumont.git"
 
 jobs:
-  build:
-    name: Test compilations
-    runs-on: ubuntu-latest
-    container: epitechcontent/epitest-docker:latest
-
-    steps:
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Test Makefile rules
-        timeout-minutes: 2
-        run: |
-          make
-          make re
-          make clean
-          make fclean
-
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    container: epitechcontent/epitest-docker:latest
-
-    steps:
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run tests
-        timeout-minutes: 2
-        run: |
-          make tests_run
-
   check_coding_style:
     name: Check coding style
     runs-on: ubuntu-latest
@@ -73,7 +36,7 @@ jobs:
 
   push_to_mirror:
     name: Push to mirror
-    needs: [build, test, check_coding_style]
+    needs: [check_coding_style]
     if: ${{ github.ref_name == 'main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
 

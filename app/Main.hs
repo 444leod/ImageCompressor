@@ -7,7 +7,16 @@
 
 module Main (main) where
 
-import Lib
+import ConfigLib
+import System.Environment(getArgs)
 
+{-  | main function
+
+    Main function of the program
+-}
 main :: IO ()
-main = someFunc
+main = do
+    args <- getArgs
+    let conf = defaultConf
+    let option = getOpts conf args
+    validateConf option

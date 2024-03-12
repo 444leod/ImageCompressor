@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      ConfigLib
   other-modules:
       Paths_ImageCompressor
   autogen-modules:

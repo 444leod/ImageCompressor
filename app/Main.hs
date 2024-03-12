@@ -10,6 +10,10 @@ module Main (main) where
 import ConfigLib
 import System.Environment(getArgs)
 
+{-  | main function
+
+    Main function of the program
+-}
 main :: IO ()
 main = do
     args <- getArgs

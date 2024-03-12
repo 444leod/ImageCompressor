@@ -55,6 +55,13 @@ readInt xs
     | intVerification xs = Just (read xs)
     | otherwise = Nothing
 
+{-
+    | readFloat function
+
+    Read a float from a string
+
+    Return Just the float if it is, Nothing otherwise
+-}
 readFloat :: [Char] -> Maybe Float
 readFloat = readMaybe
 

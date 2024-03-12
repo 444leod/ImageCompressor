@@ -12,6 +12,9 @@ jobs:
     container: epitechcontent/epitest-docker:latest
 
     steps:
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -29,6 +32,9 @@ jobs:
     container: epitechcontent/epitest-docker:latest
 
     steps:
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 

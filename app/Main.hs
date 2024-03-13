@@ -8,7 +8,6 @@
 module Main (main) where
 
 import ConfigLib
-import TypeLib
 import FileLib
 import System.Environment(getArgs)
 
@@ -22,3 +21,6 @@ main = do
     let conf = defaultConf
     let option = getOpts conf args
     validateConf option
+    case option of
+        Just opt -> launchFile (createVerifiedConf opt)
+        Nothing -> myError "Error: invalid arguments"

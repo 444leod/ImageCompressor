@@ -6,7 +6,6 @@
 -}
 
 module FileLib(
-    verificationFile,
     launchFile
 ) where
 
@@ -18,13 +17,13 @@ import Text.Read
 import Data.Char (isSpace)
 
 {-
-    | verificationFile function
+    | getFileContents function
 
     Verifies if the file exists and returns its content
 -}
-verificationFile :: String -> IO (Maybe String)
-verificationFile [] = return Nothing
-verificationFile path = catch (fmap Just (readFile path)) handler
+getFileContents :: String -> IO (Maybe String)
+getFileContents [] = return Nothing
+getFileContents path = catch (fmap Just (readFile path)) handler
   where
     handler :: IOException -> IO (Maybe String)
     handler _ = return Nothing
@@ -72,18 +71,29 @@ verifyImg (x:xs) (Just in') = case verifyLine x of
 verifyImg _ Nothing = Nothing
 verifyImg [] (Just in') = Just (In in')
 
+getNbPixels :: In -> Int -> Int
+getNbPixels (In []) acc = acc
+getNbPixels (In (_:xs)) acc = getNbPixels (In xs) (acc + 1)
+
 {-  | launchFile function
 
-    Launches the file parser 
+    Gets the file content and launches the file parser
 -}
 launchFile :: VerifiedConf -> IO ()
-launchFile conf = do
-    file' <- verificationFile (_filePath conf)
-    fileParser file' 
+launchFile oldconf = do
+    file' <- getFileContents (_filePath oldconf)
+    parsedFile <- fileParser file'
+    let conf = oldconf{
+        _file = In[],
+        _nbPixels = getNbPixels parsedFile 0
+    }
+    print conf
+    return ()
+    
 
-fileParser :: Maybe String -> VerifiedConf -> IO ()
-fileParser Nothing _ = myError "Error: file not found"
-fileParser (Just "") _ = myError "Error: empty file"
-fileParser (Just content) conf = case verifyImg (lines content) (Just []) of
-    Just img -> print img
-    Nothing -> myError "Error: invalid file"
+fileParser :: Maybe String -> IO (In)
+fileParser Nothing = myError "Error: file not found" >> return (In [])
+fileParser (Just "") = myError "Error: empty file" >> return (In [])
+fileParser (Just content) = case verifyImg (lines content) (Just []) of
+    Just img -> print img >> return img
+    Nothing -> myError "Error: invalid file" >> return (In [])

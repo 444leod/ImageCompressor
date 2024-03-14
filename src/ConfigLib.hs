@@ -20,6 +20,7 @@ import Data.Char(isDigit)
 import System.Exit(exitWith, ExitCode(ExitFailure))
 import System.IO (hPutStrLn, hPutStr, stderr)
 import Text.Read(readMaybe)
+import TypeLib
 
 {-  | Conf data
 
@@ -29,7 +30,8 @@ data Conf = Conf {
     nbColors :: Maybe Int,
     convergenceLimit :: Maybe Float,
     filePath :: Maybe String,
-    file :: String
+    file :: In,
+    nbPixels :: Int
 } deriving (Show)
 
 {-  | VerifiedConf data
@@ -40,7 +42,8 @@ data VerifiedConf = VerifiedConf {
     _nbColors :: Int,
     _convergenceLimit :: Float,
     _filePath :: String,
-    _file :: String
+    _file :: In,
+    _nbPixels :: Int
 } deriving (Show)
 
 -- Private functions
@@ -102,7 +105,8 @@ defaultConf = Conf {
     nbColors = Nothing,
     convergenceLimit = Nothing,
     filePath = Nothing,
-    file = ""
+    file = In[],
+    nbPixels = 0
 }
 
 {-  | getOpts function
@@ -130,15 +134,15 @@ getOpts _ _ = Nothing
 -}
 validateConf :: Maybe Conf -> IO ()
 validateConf Nothing = myError "Error:\n\tMissing arguments."
-validateConf (Just (Conf Nothing _ _ _)) =
+validateConf (Just (Conf Nothing _ _ _ _)) =
     myError "Error:\n\tn is missing."
-validateConf (Just (Conf _ Nothing _ _)) =
+validateConf (Just (Conf _ Nothing _ _ _)) =
     myError "Error:\n\tl is missing."
-validateConf (Just (Conf _ _ Nothing _)) =
+validateConf (Just (Conf _ _ Nothing _ _)) =
     myError "Error:\n\tf is missing."
-validateConf (Just (Conf (Just nbColors') _ _ _))
+validateConf (Just (Conf (Just nbColors') _ _ _ _))
     | nbColors' < 1 = myError "Error:\n\tn must be greater than 0."
-validateConf (Just (Conf _ (Just convergenceLimit') _ _))
+validateConf (Just (Conf _ (Just convergenceLimit') _ _ _))
     | convergenceLimit' < 0 = myError "Error:\n\tl must be greater than 0."
 validateConf _ = return ()
 
@@ -148,11 +152,12 @@ validateConf _ = return ()
 -}
 createVerifiedConf :: Conf -> VerifiedConf
 createVerifiedConf (Conf (Just nbColors') (Just convergenceLimit')
-    (Just filePath') file') =
+    (Just filePath') file' nbPixels') =
     VerifiedConf {
         _nbColors = nbColors',
         _convergenceLimit = convergenceLimit',
         _filePath = filePath',
-        _file = file'
+        _file = file',
+        _nbPixels = nbPixels'
     }
-createVerifiedConf _ = VerifiedConf 0 0.0 "" ""
+createVerifiedConf _ = VerifiedConf 0 0.0 "" (In []) 0

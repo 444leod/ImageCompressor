@@ -15,7 +15,6 @@ import TypeLib
 import Control.Exception
 import Data.List.Split
 import Text.Read
-import System.IO
 import Data.Char (isSpace)
 
 {-
@@ -53,17 +52,25 @@ returnLine _ Nothing = Nothing
 returnLine (Just point) (Just color) = Just(point, color)
 
 verifyLine :: String -> Maybe Line
-verifyLine str = do
-
-    let tuple = split (keepDelimsR $ oneOf ")") str
+verifyLine str =
     returnLine (verifyPoint (tuple !! 0)) (verifyColor (tuple !! 1))
+    where
+        tuple = split (keepDelimsR $ oneOf ")") str
 
-verifyImg :: [String] -> Maybe In
-verifyImg (x:xs) =
-    let line = verifyLine x
-    in case line of
-        Nothing -> Nothing
-        Just line -> Just(In[line])
+-- ALTERNATIVE TO verifyImg FUNCTION, SAME SPEED
+-- verifyLine :: String -> Maybe Line
+-- verifyLine str = do
+--     let splitList = split (keepDelimsR $ oneOf ")") str
+--     case splitList of
+--         [point, color, _] -> returnLine (verifyPoint point) (verifyColor color)
+--         _ -> Nothing
+
+verifyImg :: [String] -> Maybe [Line] -> Maybe In
+verifyImg (x:xs) (Just in') = case verifyLine x of
+    Just line -> verifyImg xs (Just (line : in'))
+    Nothing -> Nothing
+verifyImg _ Nothing = Nothing
+verifyImg [] (Just in') = Just (In in')
 
 {-  | launchFile function
 
@@ -71,14 +78,9 @@ verifyImg (x:xs) =
 -}
 launchFile :: VerifiedConf -> IO ()
 launchFile conf = do
-    let line = (split (keepDelimsR $ oneOf ")") "(8  ,0) (289,243,245)")
-    print (removeLeadingSpaces (line !! 0))
-    print (removeLeadingSpaces (line !! 1))
-    print (verifyColor ("(269,243,245)"))
-    print (verifyColor ("(229,243,245)"))
-    print (verifyPoint (line !! 0))
-    print (verifyColor (line !! 1))
-    file <- verificationFile (_filePath conf)
-    case file of
-        Just content -> print(verifyImg (lines content))
+    file' <- verificationFile (_filePath conf)
+    case file' of
+        Just content -> case verifyImg (lines content) (Just []) of
+            Just img -> print img
+            Nothing -> myError "Error: invalid file"
         Nothing -> myError "Error: file not found"

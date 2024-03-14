@@ -84,16 +84,20 @@ launchFile oldconf = do
     file' <- getFileContents (_filePath oldconf)
     parsedFile <- fileParser file'
     let conf = oldconf{
-        _file = In[],
+        _file = parsedFile,
         _nbPixels = getNbPixels parsedFile 0
     }
-    print conf
+    checkNbPixels (_nbPixels conf) (_nbColors conf)
     return ()
     
-
 fileParser :: Maybe String -> IO (In)
-fileParser Nothing = myError "Error: file not found" >> return (In [])
-fileParser (Just "") = myError "Error: empty file" >> return (In [])
+fileParser Nothing = myError "Error:\n\tfile not found" >> return (In [])
+fileParser (Just "") = myError "Error:\n\tempty file" >> return (In [])
 fileParser (Just content) = case verifyImg (lines content) (Just []) of
     Just img -> print img >> return img
-    Nothing -> myError "Error: invalid file" >> return (In [])
+    Nothing -> myError "Error:\n\tinvalid file" >> return (In [])
+
+checkNbPixels :: Int -> Int -> IO ()
+checkNbPixels nbPixels' nbColors'
+    | nbPixels' < nbColors' = myError "Error:\n\tnot enough pixels" >> return ()
+    | otherwise = return ()

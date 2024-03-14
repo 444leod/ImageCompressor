@@ -142,6 +142,10 @@ validateConf (Just (Conf _ (Just convergenceLimit') _ _))
     | convergenceLimit' < 0 = myError "Error:\n\tl must be greater than 0."
 validateConf _ = return ()
 
+{-  | createVerifiedConf function
+
+    Return the verified configuration
+-}
 createVerifiedConf :: Conf -> VerifiedConf
 createVerifiedConf (Conf (Just nbColors') (Just convergenceLimit')
     (Just filePath') file') =

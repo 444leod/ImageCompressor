@@ -11,16 +11,16 @@ module TypeLib(
     Color,
     Line,
     Cluster,
-    In,
+    In(..),
     Out,
     makeShort
 ) where
 
 type Point = (Int, Int)
 
-newtype Short = Short Int deriving (Show)
+newtype Short = Short Int deriving (Show, Read)
 
-type Color = (Short, Short, Short)
+type Color = (Int, Int, Int)
 
 type Line = (Point, Color)
 

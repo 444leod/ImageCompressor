@@ -79,8 +79,11 @@ verifyImg [] (Just in') = Just (In in')
 launchFile :: VerifiedConf -> IO ()
 launchFile conf = do
     file' <- verificationFile (_filePath conf)
-    case file' of
-        Just content -> case verifyImg (lines content) (Just []) of
-            Just img -> print img
-            Nothing -> myError "Error: invalid file"
-        Nothing -> myError "Error: file not found"
+    fileParser file' 
+
+fileParser :: Maybe String -> VerifiedConf -> IO ()
+fileParser Nothing _ = myError "Error: file not found"
+fileParser (Just "") _ = myError "Error: empty file"
+fileParser (Just content) conf = case verifyImg (lines content) (Just []) of
+    Just img -> print img
+    Nothing -> myError "Error: invalid file"

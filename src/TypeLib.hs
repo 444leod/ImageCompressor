@@ -12,8 +12,7 @@ module TypeLib(
     Line,
     Cluster,
     In(..),
-    Out,
-    makeShort
+    Out
 ) where
 
 type Point = (Int, Int)
@@ -29,9 +28,3 @@ newtype Cluster = Cluster (Color, [Line]) deriving (Show)
 newtype In = In [Line] deriving (Show)
 
 type Out = [Cluster]
-
-makeShort :: Int -> Maybe Short
-makeShort x
-    | x >= 0 && x <= 255 = Just (Short x)
-    | otherwise = Nothing
-

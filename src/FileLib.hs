@@ -16,6 +16,7 @@ import Control.Exception
 import Data.List.Split
 import Text.Read
 import System.IO
+import Data.Char (isSpace)
 
 {-
     | verificationFile function
@@ -29,14 +30,22 @@ verificationFile path = catch (fmap Just (readFile path)) handler
     handler :: IOException -> IO (Maybe String)
     handler _ = return Nothing
 
-substringAfterChar :: Char -> String -> String
-substringAfterChar c = snd . break (== c) . dropWhile (/= c)
+removeLeadingSpaces :: String -> String
+removeLeadingSpaces = dropWhile isSpace
+
+verifyColorValue :: Maybe Color -> Maybe Color
+verifyColorValue Nothing = Nothing
+verifyColorValue (Just (x, y, z))
+    | x >= 0 && x <= 255 && y >= 0 && y <= 255 && z >= 0 && z <= 255 =
+        Just(x, y, z)
+    | otherwise = Nothing
 
 verifyPoint :: String -> Maybe Point
-verifyPoint str = readMaybe (substringAfterChar '(' str) :: Maybe Point
+verifyPoint str = readMaybe (removeLeadingSpaces str) :: Maybe Point
 
 verifyColor :: String -> Maybe Color
-verifyColor str = readMaybe (substringAfterChar '(' str) :: Maybe Color
+verifyColor str =
+    verifyColorValue (readMaybe (removeLeadingSpaces str) :: Maybe Color)
 
 returnLine :: Maybe Point -> Maybe Color -> Maybe Line
 returnLine Nothing _ = Nothing
@@ -62,10 +71,11 @@ verifyImg (x:xs) =
 -}
 launchFile :: VerifiedConf -> IO ()
 launchFile conf = do
-    let line = (split (keepDelimsR $ oneOf ")") "(8  ,0) (249,243,245)")
-    print (substringAfterChar '(' (line !! 0))
-    print (substringAfterChar '(' (line !! 1))
-    print (verifyColor ("(249,243,245)"))
+    let line = (split (keepDelimsR $ oneOf ")") "(8  ,0) (289,243,245)")
+    print (removeLeadingSpaces (line !! 0))
+    print (removeLeadingSpaces (line !! 1))
+    print (verifyColor ("(269,243,245)"))
+    print (verifyColor ("(229,243,245)"))
     print (verifyPoint (line !! 0))
     print (verifyColor (line !! 1))
     file <- verificationFile (_filePath conf)

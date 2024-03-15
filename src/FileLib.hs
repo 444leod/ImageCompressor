@@ -127,7 +127,7 @@ fileParser :: Maybe String -> IO (In)
 fileParser Nothing = myError "Error:\n\tfile not found" >> return (In [])
 fileParser (Just "") = myError "Error:\n\tempty file" >> return (In [])
 fileParser (Just content) = case verifyImg (lines content) (Just []) of
-    Just img -> print img >> return img
+    Just img -> return img
     Nothing -> myError "Error:\n\tinvalid file" >> return (In [])
 
 {-  | launchFile function

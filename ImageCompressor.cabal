@@ -38,11 +38,17 @@ library
   build-depends:
       base >=4.7 && <5
     , split
+    , random
   default-language: Haskell2010
 
 executable ImageCompressor-exe
   main-is: Main.hs
   other-modules:
+      Cluster
+      IsInList
+      IsUnique
+      RandomList
+      Types
       Paths_ImageCompressor
   autogen-modules:
       Paths_ImageCompressor
@@ -53,6 +59,7 @@ executable ImageCompressor-exe
       ImageCompressor
     , base >=4.7 && <5
     , split
+    , random
   default-language: Haskell2010
 
 test-suite ImageCompressor-test
@@ -69,4 +76,5 @@ test-suite ImageCompressor-test
       ImageCompressor
     , base >=4.7 && <5
     , split
+    , random
   default-language: Haskell2010

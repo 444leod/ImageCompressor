@@ -7,9 +7,12 @@
 
 module ConfigLib(
     Conf(..),
+    VerifiedConf(..),
     defaultConf,
     getOpts,
-    validateConf
+    validateConf,
+    myError,
+    createVerifiedConf
 ) where
 
 import Data.Maybe()
@@ -17,15 +20,30 @@ import Data.Char(isDigit)
 import System.Exit(exitWith, ExitCode(ExitFailure))
 import System.IO (hPutStrLn, hPutStr, stderr)
 import Text.Read(readMaybe)
+import TypeLib
 
 {-  | Conf data
 
     Store the configuration of the program
 -}
 data Conf = Conf {
-    _nbColors :: Maybe Int,
-    _convergenceLimit :: Maybe Float,
-    _filePath :: Maybe String
+    nbColors :: Maybe Int,
+    convergenceLimit :: Maybe Float,
+    filePath :: Maybe String,
+    file :: In,
+    nbPixels :: Int
+} deriving (Show)
+
+{-  | VerifiedConf data
+
+    Store the verified configuration of the program
+-}
+data VerifiedConf = VerifiedConf {
+    _nbColors :: Int,
+    _convergenceLimit :: Float,
+    _filePath :: String,
+    _file :: In,
+    _nbPixels :: Int
 } deriving (Show)
 
 -- Private functions
@@ -84,9 +102,11 @@ myError str =
 -}
 defaultConf :: Conf
 defaultConf = Conf {
-    _nbColors = Nothing,
-    _convergenceLimit = Nothing,
-    _filePath = Nothing
+    nbColors = Nothing,
+    convergenceLimit = Nothing,
+    filePath = Nothing,
+    file = In[],
+    nbPixels = 0
 }
 
 {-  | getOpts function
@@ -99,11 +119,11 @@ getOpts :: Conf -> [String] -> Maybe Conf
 getOpts conf [] = Just conf
 getOpts conf ("-n": x:xs) = case readInt x of
     Nothing -> Nothing
-    Just x' -> getOpts conf{_nbColors = Just x'} xs
+    Just x' -> getOpts conf{nbColors = Just x'} xs
 getOpts conf ("-l": x:xs) = case readFloat x of
     Nothing -> Nothing
-    Just x' -> getOpts conf{_convergenceLimit = Just x'} xs
-getOpts conf ("-f": x:xs) = getOpts conf{_filePath = Just x} xs
+    Just x' -> getOpts conf{convergenceLimit = Just x'} xs
+getOpts conf ("-f": x:xs) = getOpts conf{filePath = Just x} xs
 getOpts _ _ = Nothing
 
 {-  | validateConf function
@@ -114,14 +134,30 @@ getOpts _ _ = Nothing
 -}
 validateConf :: Maybe Conf -> IO ()
 validateConf Nothing = myError "Error:\n\tMissing arguments."
-validateConf (Just (Conf Nothing _ _)) =
+validateConf (Just (Conf Nothing _ _ _ _)) =
     myError "Error:\n\tn is missing."
-validateConf (Just (Conf _ Nothing _)) =
+validateConf (Just (Conf _ Nothing _ _ _)) =
     myError "Error:\n\tl is missing."
-validateConf (Just (Conf _ _ Nothing)) =
+validateConf (Just (Conf _ _ Nothing _ _)) =
     myError "Error:\n\tf is missing."
-validateConf (Just (Conf (Just _nbColors') _ _))
-    | _nbColors' < 1 = myError "Error:\n\tn must be greater than 0."
-validateConf (Just (Conf _ (Just _convergenceLimit') _))
-    | _convergenceLimit' < 0 = myError "Error:\n\tl must be greater than 0."
+validateConf (Just (Conf (Just nbColors') _ _ _ _))
+    | nbColors' < 1 = myError "Error:\n\tn must be greater than 0."
+validateConf (Just (Conf _ (Just convergenceLimit') _ _ _))
+    | convergenceLimit' < 0 = myError "Error:\n\tl must be greater than 0."
 validateConf _ = return ()
+
+{-  | createVerifiedConf function
+
+    Return the verified configuration
+-}
+createVerifiedConf :: Conf -> VerifiedConf
+createVerifiedConf (Conf (Just nbColors') (Just convergenceLimit')
+    (Just filePath') file' nbPixels') =
+    VerifiedConf {
+        _nbColors = nbColors',
+        _convergenceLimit = convergenceLimit',
+        _filePath = filePath',
+        _file = file',
+        _nbPixels = nbPixels'
+    }
+createVerifiedConf _ = VerifiedConf 0 0.0 "" (In []) 0

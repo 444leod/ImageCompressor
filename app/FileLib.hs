@@ -10,11 +10,14 @@ module FileLib(
 ) where
 
 import ConfigLib
-import TypeLib
 import Control.Exception
 import Data.List.Split
 import Text.Read
 import Data.Char (isSpace)
+import Types
+import RandomList
+import Cluster
+import Algorithm
 
 {-
     | getFileContents function
@@ -50,8 +53,8 @@ getNbPixels (In (_:xs)) acc = getNbPixels (In xs) (acc + 1)
     Error message if not enough pixels
 -}
 checkNbPixels :: Int -> Int -> IO ()
-checkNbPixels pixels colors'
-    | pixels < colors' = myError "Error:\n\tnot enough pixels" >> return ()
+checkNbPixels pixelArr colors'
+    | pixelArr < colors' = myError "Error:\n\tnot enough pixels"
     | otherwise = return ()
 
 {-
@@ -71,18 +74,18 @@ verifyColorValue (Just (x, y, z))
 
     Returns a line if the point and the color are valid
 -}
-returnLine :: Maybe Point -> Maybe Color -> Maybe Line
+returnLine :: Maybe Position -> Maybe Color -> Maybe Line
 returnLine Nothing _ = Nothing
 returnLine _ Nothing = Nothing
-returnLine (Just point) (Just color) = Just(point, color)
+returnLine (Just point) (Just colr) = Just(point, colr)
 
 {-
     | verifyPoint function
 
     Parses a point and verifies if it is a valid
 -}
-verifyPoint :: String -> Maybe Point
-verifyPoint str = readMaybe (removeLeadingSpaces str) :: Maybe Point
+verifyPoint :: String -> Maybe Position
+verifyPoint str = readMaybe (removeLeadingSpaces str) :: Maybe Position
 
 {-
     | verifyColor function
@@ -104,7 +107,6 @@ verifyLine str =
     where
         tuple = split (keepDelimsR $ oneOf ")") str
 
-
 {-
     | verifyImg function
 
@@ -119,7 +121,7 @@ verifyImg [] (Just in') = Just (In in')
 
 
 {-  | fileParser function
-    
+
     Parses the file content
     Error message if the file is invalid, empty or not found
 -}
@@ -130,21 +132,54 @@ fileParser (Just content) = case verifyImg (lines content) (Just []) of
     Just img -> return img
     Nothing -> myError "Error:\n\tinvalid file" >> return (In [])
 
-{-  | launchFile function
+{-  | getConfigFromFile function
 
     Gets the file content and launches the file parser
     Also saves the number of pixels and the parsed file into conf
 -}
-launchFile :: VerifiedConf -> IO ()
-launchFile oldconf = do
+getConfigFromFile :: VerifiedConf -> IO VerifiedConf
+getConfigFromFile oldconf = do
     file' <- getFileContents (_filePath oldconf)
     parsedFile <- fileParser file'
-    let conf = oldconf{
+    return (oldconf{
         _file = parsedFile,
         _nbPixels = getNbPixels parsedFile 0
-    }
+    })
+
+{-  | getInitialClusters function
+
+    generate the base clusters based on the parsed pixels
+-}
+getInitialClusters :: VerifiedConf -> IO [Cluster]
+getInitialClusters conf = do
     checkNbPixels (_nbPixels conf) (_nbColors conf)
-    return ()
+    indexes <- getRandomList (_nbColors conf) (1, _nbPixels conf)
+    return (
+        getClusters (getPixelsFromIn (_file conf)) (_nbPixels conf) indexes)
+
+
+{-  | launchFile function
+
+    Gets the file content and launches the file parser
+    Also saves the number of pixels and the parsed file into conf and launches
+        the algorithm
+-}
+launchFile :: VerifiedConf -> IO ()
+launchFile oldconf = do
+    conf <- getConfigFromFile oldconf
+    clusters <- getInitialClusters conf
+    displayClusters (doAlgorithmWithClusters
+        (updateClusters (getPixelsFromIn (_file conf)) clusters)
+        (getPixelsFromIn (_file conf))
+        (_convergenceLimit conf))
+
+
+{-  | getPixelsFromIn function
+
+    Gets the pixels from the In type (parsed lines from the file)
+-}
+getPixelsFromIn :: In -> [Pixel]
+getPixelsFromIn (In pix) = map (\(pos, col) -> (pos, col)) pix
 
 -- ALTERNATIVE TO verifyImg FUNCTION, SAME SPEED
 -- verifyLine :: String -> Maybe Line
@@ -153,3 +188,4 @@ launchFile oldconf = do
 --     case splitList of
 --         [point, color, _] -> returnLine (verifyPoint point) (verifyColor color)
 --         _ -> Nothing
+

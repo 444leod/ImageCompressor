@@ -215,10 +215,24 @@ getR :: [PixelWithDistances] -> [Int]
 getR (((_, (r, _, _)), _):xs) = r : getR xs
 getR _ = []
 
+{-
+    | getG function
+
+    This function gets the green values of the pixels in the cluster
+
+    Returns a list of green values
+-}
 getG :: [PixelWithDistances] -> [Int]
 getG (((_, (_, g, _)), _):xs) = g : getG xs
 getG _ = []
 
+{-
+    | getB function
+
+    This function gets the blue values of the pixels in the cluster
+
+    Returns a list of blue values
+-}
 getB :: [PixelWithDistances] -> [Int]
 getB (((_, (_, _, b)), _):xs) = b : getB xs
 getB _ = []

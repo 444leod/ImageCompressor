@@ -10,7 +10,11 @@ module Types (
     Pixel,
     Position,
     Color,
-    Conf(..),
+    Distance,
+    PixelWithDistances,
+    In(..),
+    Short(..),
+    Line
 ) where
 
 {- | Types module
@@ -35,8 +39,6 @@ module Types (
 type Pixel = (Position, Color)
 type Position = (Int, Int)
 type Color = (Int, Int, Int)
-data Conf = Conf {k :: Int, linesNumber :: Int}
-  deriving (Show)
 
 {-  | Cluster data type
 
@@ -44,6 +46,13 @@ data Conf = Conf {k :: Int, linesNumber :: Int}
         representative color and a list of pixels, which are
         the pixels that are closest to the representative color
 -}
-data Cluster = Cluster {color :: Color, pixels :: [Pixel]}
+data Cluster = Cluster {color :: Color, pixels :: [PixelWithDistances], oldColor :: Color}
 
+newtype In = In [Pixel] deriving (Show)
 
+newtype Short = Short Int deriving (Show, Read)
+
+type Line = (Position, Color)
+
+type PixelWithDistances = (Pixel, [Distance])
+type Distance = Float

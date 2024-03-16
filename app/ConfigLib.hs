@@ -20,7 +20,7 @@ import Data.Char(isDigit)
 import System.Exit(exitWith, ExitCode(ExitFailure))
 import System.IO (hPutStrLn, hPutStr, stderr)
 import Text.Read(readMaybe)
-import TypeLib
+import Types
 
 {-  | Conf data
 
@@ -48,7 +48,7 @@ data VerifiedConf = VerifiedConf {
 
 -- Private functions
 
-{-  | intVerification function 
+{-  | intVerification function
 
     Check if a string is a number
 
@@ -84,7 +84,7 @@ readFloat :: [Char] -> Maybe Float
 readFloat = readMaybe
 
 {-  | myError function
-    
+
     Print an error message and exit the program with a failure code
 -}
 myError :: String -> IO ()

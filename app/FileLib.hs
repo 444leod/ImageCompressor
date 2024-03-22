@@ -11,7 +11,6 @@ module FileLib(
 
 import ConfigLib
 import Control.Exception
-import Data.List.Split
 import Text.Read
 import Data.Char (isSpace)
 import Types
@@ -105,7 +104,20 @@ verifyLine :: String -> Maybe Line
 verifyLine str =
     returnLine (verifyPoint (tuple !! 0)) (verifyColor (tuple !! 1))
     where
-        tuple = split (keepDelimsR $ oneOf ")") str
+        tuple = splitOnDelim ')' str
+
+{-
+    | splitOnDelim function
+
+    Splits a string on a delimiter
+-}
+splitOnDelim :: Eq a => a -> [a] -> [[a]]
+splitOnDelim _ [] = []
+splitOnDelim delim str =
+    let (before, remainder) = break (== delim) str
+    in (before ++ [delim]) : case remainder of
+        [] -> []
+        x -> splitOnDelim delim (tail x)
 
 {-
     | verifyImg function
